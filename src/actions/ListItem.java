@@ -615,6 +615,7 @@ public class ListItem {
 
 		// Fetch the index of the selected row in the TableView
 		int theIndex = theListItemList.getSelectionModel().getSelectedIndex();
+		int theIndex1 = theListItemList.getSelectionModel().getSelectedItem().getSequenceNumber();
 
 		// If no row is selected, give a warning and ignore the request
 		if (theIndex == -1) {
@@ -632,11 +633,11 @@ public class ListItem {
 		de.remove(theIndex);
 
 		// Correct the following sequence numbers
-		for (int ndx = theIndex; ndx < de.size(); ndx++){
-			ListItemEntry d = de.get(ndx);
-			d.sequenceNumber = ndx + 1;
-			de.set(ndx, d);
-		}
+//		for (int ndx = theIndex; ndx < de.size(); ndx++){
+//			ListItemEntry d = de.get(ndx);
+//			d.sequenceNumber = ndx + 1;
+//			de.set(ndx, d);
+//		}
 
 		// Place the list back into the TableView
 		theListItemList.setItems(de);
@@ -651,7 +652,7 @@ public class ListItem {
 
 		try {
 			stat = con.createStatement(); // Creating statement
-			String statement = "Delete from " + table_name + " where Name='" + theListItemList.getSelectionModel().getSelectedItem().getListItemName() + "'";
+			String statement = "Delete from " + table_name + " where Seq_No=" + theIndex1;
 			System.out.println("()()()() STMT = " + statement);
 			stat.executeUpdate(statement); // Executing Query
 
@@ -760,7 +761,7 @@ public class ListItem {
 				String updateStatement = "Update " + table_name + " set Name='" + theNameField.getText() +"', Description='" + theDescriptionArea.getText().trim() + "' where Name=" + def.getListItemName();
 				stat.executeUpdate(updateStatement); // Executing Query
 			} else {
-				String updateStatement = "Update " + table_name + " set Name='" + theNameField.getText() +"', Description='" + theDescriptionArea.getText().trim() + "' where Name=" + def.getListItemName();
+				String updateStatement = "Update " + table_name + " set Name='" + theNameField.getText() +"', Description='" + theDescriptionArea.getText().trim() + "' where Name='" + def.getListItemName() +"'";
 				System.out.println(updateStatement);
 				stat.executeUpdate(updateStatement); // Executing Query
 			}
@@ -799,10 +800,22 @@ public class ListItem {
 		theItemDescription = theDescriptionArea.getText();
 
 		// Create a new item entry based on those values
-		ListItemEntry def = new ListItemEntry(theItemIndex+1, theItemName, theItemDescription);
 
-		// Add the new item entry at the end of the list
-		de.add(def);
+
+		try {
+			int seqno = (de.get(theItemIndex - 1).getSequenceNumber()) + 1;
+			// Create a new item entry based on those values
+			ListItemEntry def = new ListItemEntry(seqno, theItemName, theItemDescription);
+			// Add the new item entry at the end of the list
+			de.add(def);
+		} catch (Exception e) {
+			ListItemEntry def = new ListItemEntry(theItemIndex+1, theItemName, theItemDescription);
+			// Add the new item entry at the end of the list
+			de.add(def);
+		}
+
+
+
 
 		// Place the list into the TableView
 		theListItemList.setItems(de);
